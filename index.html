@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BrandAlign AI - Enterprise brand governance and compliance platform" />
+  <title>BrandAlign AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/Brand-Governance-V1/assets/index-WDA7GXnC.js"></script>
+  <link rel="stylesheet" crossorigin href="/Brand-Governance-V1/assets/index-Cs2K1ukb.css">
+</head>
+
+<body>
+  <div id="root" style="color: #666; font-family: sans-serif; padding: 20px;">
+    Loading Brand Governance System...
+  </div>
+  <script>
+    // Visual Console Setup
+    var debugOverlay = document.createElement('div');
+    debugOverlay.id = 'debug-overlay';
+    debugOverlay.style.position = 'fixed';
+    debugOverlay.style.bottom = '0';
+    debugOverlay.style.right = '0';
+    debugOverlay.style.width = '100%';
+    debugOverlay.style.height = '300px';
+    debugOverlay.style.background = 'rgba(0,0,0,0.85)';
+    debugOverlay.style.color = '#0f0';
+    debugOverlay.style.fontFamily = 'monospace';
+    debugOverlay.style.fontSize = '12px';
+    debugOverlay.style.overflowY = 'scroll';
+    debugOverlay.style.padding = '10px';
+    debugOverlay.style.zIndex = '10000';
+    debugOverlay.style.pointerEvents = 'none'; // Click through
+    document.body.appendChild(debugOverlay);
+
+    function logToScreen(type, args) {
+      var msg = Array.from(args).map(a => {
+        try { return typeof a === 'object' ? JSON.stringify(a) : String(a); }
+        catch (e) { return '[Circular/Unserializable]'; }
+      }).join(' ');
+      var line = document.createElement('div');
+      line.style.borderBottom = '1px solid #333';
+      line.style.color = type === 'error' ? '#ff6b6b' : '#0f0';
+      line.textContent = '>' + msg;
+      debugOverlay.appendChild(line);
+      debugOverlay.scrollTop = debugOverlay.scrollHeight;
+      console.originalLog && console.originalLog.apply(console, args);
+    }
+
+    // Capture Consoles
+    console.originalLog = console.log;
+    console.log = function () { logToScreen('log', arguments); };
+    console.error = function () { logToScreen('error', arguments); };
+    console.warn = function () { logToScreen('warn', arguments); };
+
+    // Capture Errors
+    window.onerror = function (message, source, lineno, colno, error) {
+      logToScreen('error', ['Global Error:', message, source + ':' + lineno]);
+    };
+
+    // Capture Promise Rejections
+    window.onunhandledrejection = function (event) {
+      logToScreen('error', ['Unhandled Rejection:', event.reason ? event.reason.message : 'Unknown']);
+    };
+
+    console.log("Visual Debugger Active. App starting...");
+  </script>
+</body>
+
+</html>
