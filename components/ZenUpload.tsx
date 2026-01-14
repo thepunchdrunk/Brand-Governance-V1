@@ -23,7 +23,7 @@ const Card = ({ children, className }: { children: React.ReactNode; className?: 
 );
 
 const SelectionPill = ({ label, icon: Icon, selected, onClick }: any) => {
-    // Danfoss Red is the only accent color now
+    // Brand Red is the only accent color now
     const selectedStyle = "bg-[#E2000F]/10 border-[#E2000F]/50 text-[#E2000F]";
     const unselectedStyle = "bg-slate-50 border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-100";
 

@@ -14,10 +14,10 @@ export default {
                 bg: '#FFFFFF',      // White - New Base
                 panel: '#F1F2F5',   // Light Gray Surface
                 surface: '#FFFFFF', // White Surface
-                primary: '#E2000F', // Danfoss Red - Main Action
+                primary: '#E2000F', // Brand Red - Main Action
                 secondary: '#686868', // Dove Gray - Secondary Text/borders
                 success: '#10b981', // Emerald 500 - Keep for success
-                danger: '#E2000F',  // Danfoss Red - Danger/Error
+                danger: '#E2000F',  // Brand Red - Danger/Error
                 highlight: '#333333', // Deep Black/Gray for Text
                 border: '#e2e8f0',  // Slate 200 - Subtle Borders
             }

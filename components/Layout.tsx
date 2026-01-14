@@ -40,7 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
             <ShieldCheck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <span className="text-xl font-bold tracking-tight block leading-none text-slate-900">Danfoss</span>
+            <span className="text-xl font-bold tracking-tight block leading-none text-slate-900">BrandAlign</span>
             <span className="text-[10px] text-slate-500 font-bold tracking-[0.2em] uppercase mt-1 block">
               {userRole === UserRole.ADMIN ? 'Admin Console' : 'Governance'}
             </span>
