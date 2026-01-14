@@ -146,12 +146,9 @@ export const ScoreDashboard: React.FC<ScoreDashboardProps> = ({ result, onReset,
     }, [fileUrl, htmlContent]);
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 p-6 flex flex-col items-center">
+        <div className="h-full w-full p-4 lg:p-6 animate-fade-in relative z-10">
             {/* BACKGROUND FX */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-slate-200/40 blur-[100px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-500/5 blur-[100px] rounded-full" />
-            </div>
+
 
             {/* HEADER */}
             <header className="w-full max-w-7xl flex flex-col gap-6 mb-8 relative z-10">
@@ -197,10 +194,10 @@ export const ScoreDashboard: React.FC<ScoreDashboardProps> = ({ result, onReset,
             </header>
 
             {/* MAIN SPLIT VIEW */}
-            <main className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-280px)] relative z-10">
+            <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100%-120px)] relative z-10">
 
                 {/* LEFT: CONTENT VIEWER (2/3 width) */}
-                <section className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col relative group shadow-xl shadow-slate-200/40">
+                <section className="lg:col-span-2 glass-panel rounded-2xl overflow-hidden flex flex-col relative group shadow-glass">
 
                     <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
@@ -247,7 +244,7 @@ export const ScoreDashboard: React.FC<ScoreDashboardProps> = ({ result, onReset,
                 </section >
 
                 {/* RIGHT: UNIFIED ISSUE STREAM (1/3 width) */}
-                < section className="flex flex-col h-full overflow-hidden bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/40" >
+                <section className="flex flex-col h-full overflow-hidden glass-panel rounded-2xl shadow-glass">
 
                     {/* FILTER TABS */}
                     < div className="flex p-1 gap-1 border-b border-slate-100 bg-slate-50/50 overflow-x-auto scrollbar-hide" >
@@ -317,6 +314,12 @@ export const ScoreDashboard: React.FC<ScoreDashboardProps> = ({ result, onReset,
                                                 <span className="px-1.5 py-0.5 rounded-sm bg-amber-500/20 text-amber-300 border border-amber-500/20 text-[9px] font-bold uppercase tracking-wider">ADVISORY</span>
                                             )}
                                             <span className="text-[10px] font-bold text-slate-400 uppercase truncate">{issue.category}</span>
+                                            {/* Timestamp for video issues */}
+                                            {issue.timestamp !== undefined && (
+                                                <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                                                    {Math.floor(issue.timestamp / 60)}:{String(Math.floor(issue.timestamp % 60)).padStart(2, '0')}
+                                                </span>
+                                            )}
                                         </div>
                                         <h4 className="font-bold text-slate-900 text-sm leading-tight truncate">{issue.description}</h4>
                                     </div>

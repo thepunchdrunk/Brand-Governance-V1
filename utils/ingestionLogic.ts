@@ -1,4 +1,4 @@
-import { AssetType, CommunicationContext, AudienceScope } from '../types';
+import { AssetType, CommunicationContext, AudienceScope, AssetDomain, AssetCategory, TaxonomyEntry } from '../types';
 
 export enum InputMethod {
     FILE = 'Upload Files',
@@ -11,100 +11,83 @@ export interface AssetOption {
     context: CommunicationContext; // Implicit context mapping
 }
 
-// --- REFACTORED TAXONOMY (Function-First) ---
 
-export const INTERNAL_ASSETS: Record<string, AssetOption[]> = {
-    "HR & People (Culture)": [
-        { label: 'Job Description', value: AssetType.JOB_DESC, context: CommunicationContext.HR },
-        { label: 'Offer Letter', value: AssetType.OFFER_LETTER, context: CommunicationContext.HR },
-        { label: 'Resume/CV', value: AssetType.RESUME, context: CommunicationContext.HR }, // New
-        { label: 'Interview Notes', value: AssetType.INTERVIEW_NOTES, context: CommunicationContext.HR }, // New
-        { label: 'Interview Recording', value: AssetType.INTERVIEW_REC, context: CommunicationContext.HR }, // New
-        { label: 'HR Handbook/Guide', value: AssetType.HR_GUIDE, context: CommunicationContext.HR },
-        { label: 'Performance Review', value: AssetType.PERF_REVIEW, context: CommunicationContext.HR },
-        { label: 'Onboarding Video', value: AssetType.ONBOARDING_VIDEO, context: CommunicationContext.HR },
-        { label: 'Training Video', value: AssetType.TRAINING_VIDEO, context: CommunicationContext.HR }, // New
-        { label: 'Training/e-Learning', value: AssetType.ELEARNING, context: CommunicationContext.HR },
-        { label: 'Internal Policy', value: AssetType.POLICY, context: CommunicationContext.HR },
-        { label: 'Org Chart', value: AssetType.ORG_CHART, context: CommunicationContext.HR },
-    ],
-    "Corporate Strategy (Leadership)": [
-        { label: 'Town Hall Deck', value: AssetType.TOWN_HALL, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Leadership Vlog', value: AssetType.LEADERSHIP_VLOG, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Corporate Update/Comm', value: AssetType.CORP_COMMS_VIDEO, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Strategic Memo', value: AssetType.MEMO, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Project Brief', value: AssetType.PROJECT_BRIEF, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Status Report', value: AssetType.STATUS_REPORT, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Project Report', value: AssetType.PROJECT_REPORT, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Internal Podcast', value: AssetType.INTERNAL_PODCAST, context: CommunicationContext.INTERNAL_OPS },
-    ],
-    "Operations, R&D & Technical": [
-        { label: 'SOP / Process Flow', value: AssetType.SOP, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Meeting Minutes', value: AssetType.MEETING_MINUTES, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Research Paper', value: AssetType.RESEARCH_PAPER, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Tech / Process Explainer', value: AssetType.EXPLAINER_VIDEO, context: CommunicationContext.INTERNAL_OPS }, // New (Internal Explainer)
-        { label: 'Diagram / Schematic', value: AssetType.DIAGRAM, context: CommunicationContext.INTERNAL_OPS }, // New
-        { label: 'Tech Spec', value: AssetType.TECH_SPEC, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'API Documentation', value: AssetType.API_DOCS, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'Release Notes', value: AssetType.RELEASE_NOTES, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'White Paper (Internal)', value: AssetType.WHITE_PAPER, context: CommunicationContext.INTERNAL_OPS },
-        { label: 'NDA', value: AssetType.NDA, context: CommunicationContext.LEGAL_COMPLIANCE },
-        { label: 'Internal Meeting Rec', value: AssetType.MEETING_REC, context: CommunicationContext.INTERNAL_OPS },
-    ],
-    "General": [
-        { label: 'Document', value: AssetType.DOCUMENT, context: CommunicationContext.NOT_SURE },
-        { label: 'Presentation', value: AssetType.PRESENTATION, context: CommunicationContext.NOT_SURE },
-        { label: 'Spreadsheet', value: AssetType.PRICE_LIST, context: CommunicationContext.NOT_SURE }, // Fallback using Price List or similar? No, strict fallback types.
-        { label: 'Voice Note/Memo', value: AssetType.VOICE_MEMO, context: CommunicationContext.NOT_SURE }, // New
-        { label: 'Video', value: AssetType.VIDEO, context: CommunicationContext.NOT_SURE },
-        { label: 'Image', value: AssetType.IMAGE, context: CommunicationContext.NOT_SURE },
-        { label: 'Audio', value: AssetType.AUDIO, context: CommunicationContext.NOT_SURE },
-    ]
-};
+// --- MULTI-DIMENSIONAL TAXONOMY REGISTRY ---
+export const ASSET_TAXONOMY_REGISTRY: TaxonomyEntry[] = [
+    // IT & Infrastructure
+    { type: AssetType.SYSTEM_DOC, label: 'System Documentation', domain: AssetDomain.IT, category: AssetCategory.OPERATIONAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.CHANGE_REQUEST, label: 'Change Request', domain: AssetDomain.IT, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.INCIDENT_REPORT, label: 'Incident Report', domain: AssetDomain.IT, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.NETWORK_DIAGRAM, label: 'Network Diagram', domain: AssetDomain.IT, category: AssetCategory.TECHNICAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.ARCHITECTURE_DIAGRAM, label: 'Architecture Diagram', domain: AssetDomain.IT, category: AssetCategory.TECHNICAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.RUNBOOK, label: 'Runbook / Playbook', domain: AssetDomain.IT, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.DR_PLAN, label: 'Disaster Recovery Plan', domain: AssetDomain.IT, category: AssetCategory.GOVERNANCE, sensitivity: 'Highly Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.IT_POLICY, label: 'IT Policy', domain: AssetDomain.IT, category: AssetCategory.GOVERNANCE, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.API_DOCS, label: 'API Documentation', domain: AssetDomain.IT, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.RELEASE_NOTES, label: 'Release Notes', domain: AssetDomain.IT, category: AssetCategory.OPERATIONAL, sensitivity: 'Public', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.TECH_SPEC, label: 'Tech Spec', domain: AssetDomain.IT, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.SYSTEM_EXPLAINER, label: 'System Explainer Video', domain: AssetDomain.IT, category: AssetCategory.INTERNAL_COMMS, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+
+    // Manufacturing & Shop Floor
+    { type: AssetType.WORK_INSTRUCTION, label: 'Work Instruction', domain: AssetDomain.MANUFACTURING, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.QUALITY_CHECKLIST, label: 'Quality Checklist', domain: AssetDomain.MANUFACTURING, category: AssetCategory.REGULATORY, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.EQUIPMENT_MANUAL, label: 'Equipment Manual', domain: AssetDomain.MANUFACTURING, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.MAINTENANCE_LOG, label: 'Maintenance Log', domain: AssetDomain.MANUFACTURING, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.SAFETY_BULLETIN, label: 'Safety Bulletin', domain: AssetDomain.MANUFACTURING, category: AssetCategory.REGULATORY, sensitivity: 'Public', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.SHIFT_HANDOVER, label: 'Shift Handover Report', domain: AssetDomain.MANUFACTURING, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.PRODUCTION_REPORT, label: 'Production Report', domain: AssetDomain.MANUFACTURING, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.SOP, label: 'SOP / Process Flow', domain: AssetDomain.MANUFACTURING, category: AssetCategory.GOVERNANCE, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.PROCESS_EXPLAINER, label: 'Process Explainer Video', domain: AssetDomain.MANUFACTURING, category: AssetCategory.INTERNAL_COMMS, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+
+    // Engineering & Product Development
+    { type: AssetType.CAD_DRAWING, label: 'CAD Drawing / Blueprint', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.BOM, label: 'Bill of Materials (BOM)', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.TEST_REPORT, label: 'Test Report', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.ECN, label: 'Engineering Change Notice', domain: AssetDomain.ENGINEERING, category: AssetCategory.GOVERNANCE, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.RCA, label: 'Root Cause Analysis', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.FMEA, label: 'FMEA Document', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.TECH_DATASHEET, label: 'Technical Datasheet', domain: AssetDomain.ENGINEERING, category: AssetCategory.COMMERCIAL, sensitivity: 'Public', defaultContext: CommunicationContext.SALES },
+    { type: AssetType.PRODUCT_SPEC, label: 'Product Specification', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Public', defaultContext: CommunicationContext.SALES },
+    { type: AssetType.RESEARCH_PAPER, label: 'Research Paper', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+    { type: AssetType.DIAGRAM, label: 'Diagram / Schematic', domain: AssetDomain.ENGINEERING, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.INTERNAL_OPS },
+
+    // HR & People
+    { type: AssetType.JOB_DESC, label: 'Job Description', domain: AssetDomain.HR, category: AssetCategory.OPERATIONAL, sensitivity: 'Public', defaultContext: CommunicationContext.HR },
+    { type: AssetType.OFFER_LETTER, label: 'Offer Letter', domain: AssetDomain.HR, category: AssetCategory.COMMERCIAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.HR },
+    { type: AssetType.RESUME, label: 'Resume/CV', domain: AssetDomain.HR, category: AssetCategory.OPERATIONAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.HR },
+    { type: AssetType.INTERVIEW_NOTES, label: 'Interview Notes', domain: AssetDomain.HR, category: AssetCategory.OPERATIONAL, sensitivity: 'Confidential', defaultContext: CommunicationContext.HR },
+    { type: AssetType.HR_GUIDE, label: 'HR Handbook/Guide', domain: AssetDomain.HR, category: AssetCategory.GOVERNANCE, sensitivity: 'Internal', defaultContext: CommunicationContext.HR },
+    { type: AssetType.PERF_REVIEW, label: 'Performance Review', domain: AssetDomain.HR, category: AssetCategory.OPERATIONAL, sensitivity: 'Highly Confidential', defaultContext: CommunicationContext.HR },
+
+    // General
+    { type: AssetType.DOCUMENT, label: 'Document', domain: AssetDomain.GENERAL, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.NOT_SURE },
+    { type: AssetType.PRESENTATION, label: 'Presentation', domain: AssetDomain.GENERAL, category: AssetCategory.OPERATIONAL, sensitivity: 'Internal', defaultContext: CommunicationContext.NOT_SURE },
+    { type: AssetType.VIDEO, label: 'Video', domain: AssetDomain.GENERAL, category: AssetCategory.INTERNAL_COMMS, sensitivity: 'Internal', defaultContext: CommunicationContext.NOT_SURE },
+    { type: AssetType.IMAGE, label: 'Image', domain: AssetDomain.GENERAL, category: AssetCategory.TECHNICAL, sensitivity: 'Internal', defaultContext: CommunicationContext.NOT_SURE },
+];
+
+export const INTERNAL_ASSETS: Record<string, AssetOption[]> = {};
+ASSET_TAXONOMY_REGISTRY.forEach(entry => {
+    const domainLabel = entry.domain;
+    if (!INTERNAL_ASSETS[domainLabel]) INTERNAL_ASSETS[domainLabel] = [];
+    INTERNAL_ASSETS[domainLabel].push({
+        label: entry.label,
+        value: entry.type,
+        context: entry.defaultContext
+    });
+});
 
 export const EXTERNAL_ASSETS: Record<string, AssetOption[]> = {
-    "Marketing & Brand (Awareness)": [
-        { label: 'Social Media Post', value: AssetType.SOCIAL_ASSET, context: CommunicationContext.MARKETING },
-        { label: 'Ad Campaign', value: AssetType.AD_CAMPAIGN, context: CommunicationContext.MARKETING },
-        { label: 'Brand Guidelines', value: AssetType.BRAND_GUIDELINES, context: CommunicationContext.MARKETING }, // New
-        { label: 'Logo / Brand Asset', value: AssetType.LOGO, context: CommunicationContext.MARKETING }, // New
-        { label: 'Web / Landing Page', value: AssetType.WEB_CONTENT, context: CommunicationContext.MARKETING },
-        { label: 'Blog Post', value: AssetType.BLOG_POST, context: CommunicationContext.MARKETING },
-        { label: 'Infographic', value: AssetType.INFOGRAPHIC, context: CommunicationContext.MARKETING },
-        { label: 'Event Recap', value: AssetType.EVENT_RECAP, context: CommunicationContext.MARKETING }, // New
-        { label: 'Explainer Video', value: AssetType.EXPLAINER_VIDEO, context: CommunicationContext.MARKETING }, // New
-        { label: 'E-Book', value: AssetType.EBOOK, context: CommunicationContext.MARKETING },
-        { label: 'Email/Newsletter', value: AssetType.NEWSLETTER, context: CommunicationContext.MARKETING },
-        { label: 'TV/Video Spot', value: AssetType.TV_SPOT, context: CommunicationContext.MARKETING },
-    ],
-    "Sales & Commercial (Conversion)": [
+    // For now, mapping a subset or allowing filtered registry.
+    // In a full refactor, external assets would also be in the registry with a 'scope' flag.
+    "Sales & Commercial": [
+        { label: 'Technical Datasheet', value: AssetType.TECH_DATASHEET, context: CommunicationContext.SALES },
+        { label: 'Product Specification', value: AssetType.PRODUCT_SPEC, context: CommunicationContext.SALES },
         { label: 'Pitch Deck', value: AssetType.PITCH_DECK, context: CommunicationContext.SALES },
-        { label: 'One-Pager', value: AssetType.ONE_PAGER, context: CommunicationContext.SALES }, // New
-        { label: 'Proposal / RFP', value: AssetType.PROPOSAL, context: CommunicationContext.SALES },
-        { label: 'Battlecard', value: AssetType.BATTLECARD, context: CommunicationContext.SALES },
-        { label: 'Customer Case Study', value: AssetType.CASE_STUDY, context: CommunicationContext.SALES },
-        { label: 'Sales Script', value: AssetType.SALES_SCRIPT, context: CommunicationContext.SALES },
-        { label: 'Email Template', value: AssetType.EMAIL_TEMPLATE, context: CommunicationContext.SALES },
-        { label: 'Product Demo', value: AssetType.PRODUCT_DEMO, context: CommunicationContext.SALES },
-        { label: 'Contract / SOW', value: AssetType.CONTRACT, context: CommunicationContext.SALES },
-        { label: 'Price List', value: AssetType.PRICE_LIST, context: CommunicationContext.SALES },
     ],
-    "Corporate Affairs & Support": [
-        { label: 'Press Release', value: AssetType.PRESS_RELEASE, context: CommunicationContext.MARKETING },
-        { label: 'Annual Report', value: AssetType.ANNUAL_REPORT, context: CommunicationContext.MARKETING },
-        { label: 'User Guide / Manual', value: AssetType.USER_GUIDE, context: CommunicationContext.SALES },
-        { label: 'Privacy Policy', value: AssetType.PRIVACY_POLICY, context: CommunicationContext.LEGAL_COMPLIANCE },
-        { label: 'Terms of Service', value: AssetType.TERMS, context: CommunicationContext.LEGAL_COMPLIANCE },
-        { label: 'MSA', value: AssetType.MSA, context: CommunicationContext.LEGAL_COMPLIANCE },
-        { label: 'Crisis Statement', value: AssetType.CRISIS_STATEMENT, context: CommunicationContext.LEGAL_COMPLIANCE },
-        { label: 'Reseller Kit', value: AssetType.RESELLER_KIT, context: CommunicationContext.SALES },
-    ],
-    "General": [
-        { label: 'Document', value: AssetType.DOCUMENT, context: CommunicationContext.NOT_SURE },
-        { label: 'Presentation', value: AssetType.PRESENTATION, context: CommunicationContext.NOT_SURE },
-        { label: 'Video', value: AssetType.VIDEO, context: CommunicationContext.NOT_SURE },
-        { label: 'Image', value: AssetType.IMAGE, context: CommunicationContext.NOT_SURE },
-        { label: 'Audio', value: AssetType.AUDIO, context: CommunicationContext.NOT_SURE },
+    "Marketing & Brand": [
+        { label: 'Social Media Post', value: AssetType.SOCIAL_ASSET, context: CommunicationContext.MARKETING },
+        { label: 'Brand Guidelines', value: AssetType.BRAND_GUIDELINES, context: CommunicationContext.MARKETING },
     ]
 };
 
@@ -114,70 +97,73 @@ export const EXTERNAL_ASSETS: Record<string, AssetOption[]> = {
 
 const FORMAT_COMPATIBILITY: Record<string, Set<AssetType>> = {
     DOC: new Set([
-        AssetType.HR_GUIDE, AssetType.POLICY, AssetType.MEMO, AssetType.PROJECT_REPORT,
-        AssetType.SOP, AssetType.TECH_SPEC, AssetType.WHITE_PAPER, AssetType.WEB_CONTENT,
-        AssetType.BLOG_POST, AssetType.NEWSLETTER, AssetType.PROPOSAL, AssetType.CASE_STUDY,
-        AssetType.CONTRACT, AssetType.PRICE_LIST, AssetType.PRESS_RELEASE, AssetType.ANNUAL_REPORT,
-        AssetType.USER_GUIDE, AssetType.CRISIS_STATEMENT, AssetType.RESELLER_KIT,
-        AssetType.WHITE_PAPER_EXT,
-        // New
-        AssetType.JOB_DESC, AssetType.OFFER_LETTER, AssetType.PERF_REVIEW,
-        AssetType.NDA, AssetType.MSA, AssetType.PRIVACY_POLICY, AssetType.TERMS,
-        AssetType.BATTLECARD, AssetType.SALES_SCRIPT, AssetType.EMAIL_TEMPLATE,
-        AssetType.EBOOK, AssetType.API_DOCS, AssetType.RELEASE_NOTES,
-        AssetType.RESUME, AssetType.INTERVIEW_NOTES, AssetType.MEETING_MINUTES,
-        AssetType.PROJECT_BRIEF, AssetType.STATUS_REPORT, AssetType.RESEARCH_PAPER,
-        AssetType.ONE_PAGER, AssetType.BRAND_GUIDELINES, // Often PDFs
-        // Generic
-        AssetType.DOCUMENT, AssetType.PRESENTATION // PDF often used for presentations
+        // IT Operations
+        AssetType.SYSTEM_DOC, AssetType.CHANGE_REQUEST, AssetType.INCIDENT_REPORT,
+        AssetType.RUNBOOK, AssetType.DR_PLAN, AssetType.IT_POLICY, AssetType.API_DOCS,
+        AssetType.RELEASE_NOTES, AssetType.TECH_SPEC,
+        // Manufacturing
+        AssetType.WORK_INSTRUCTION, AssetType.EQUIPMENT_MANUAL, AssetType.MAINTENANCE_LOG,
+        AssetType.SAFETY_BULLETIN, AssetType.SHIFT_HANDOVER, AssetType.PRODUCTION_REPORT,
+        AssetType.SOP, AssetType.POLICY, AssetType.MEMO, AssetType.PROJECT_REPORT,
+        // Engineering
+        AssetType.BOM, AssetType.TEST_REPORT, AssetType.ECN, AssetType.RCA, AssetType.FMEA,
+        AssetType.TECH_DATASHEET, AssetType.PRODUCT_SPEC, AssetType.RESEARCH_PAPER,
+        // Quality
+        AssetType.ISO_PROCEDURE, AssetType.AUDIT_REPORT, AssetType.CAPA,
+        AssetType.REGULATORY_FILING, AssetType.CERTIFICATION, AssetType.SDS_MSDS,
+        // Supply Chain
+        AssetType.VENDOR_CONTRACT, AssetType.PURCHASE_ORDER, AssetType.SHIPPING_DOC,
+        AssetType.INVENTORY_REPORT, AssetType.SUPPLIER_SCORECARD, AssetType.NDA, AssetType.MSA,
+        // HR & People
+        AssetType.JOB_DESC, AssetType.OFFER_LETTER, AssetType.RESUME, AssetType.INTERVIEW_NOTES,
+        AssetType.HR_GUIDE, AssetType.PERF_REVIEW, AssetType.PRIVACY_POLICY, AssetType.TERMS,
+        // Marketing/Sales
+        AssetType.WEB_CONTENT, AssetType.BLOG_POST, AssetType.NEWSLETTER, AssetType.PROPOSAL,
+        AssetType.CASE_STUDY, AssetType.CONTRACT, AssetType.PRICE_LIST, AssetType.PRESS_RELEASE,
+        AssetType.ANNUAL_REPORT, AssetType.USER_GUIDE, AssetType.RESELLER_KIT, AssetType.EBOOK,
+        AssetType.BATTLECARD, AssetType.ONE_PAGER, AssetType.BRAND_GUIDELINES, AssetType.INFOGRAPHIC,
+        AssetType.DOCUMENT, AssetType.PRESENTATION
     ]),
     PRES: new Set([
-        AssetType.ELEARNING, AssetType.TOWN_HALL, AssetType.PROJECT_REPORT,
-        AssetType.PITCH_DECK, AssetType.PROPOSAL, AssetType.RESELLER_KIT, AssetType.ORG_CHART,
-        AssetType.BATTLECARD, AssetType.INFOGRAPHIC,
-        // New
-        AssetType.BRAND_GUIDELINES, AssetType.STATUS_REPORT, AssetType.PROJECT_BRIEF,
-        // Generic
-        AssetType.PRESENTATION
+        AssetType.PRESENTATION, AssetType.PITCH_DECK, AssetType.TOWN_HALL,
+        AssetType.STATUS_REPORT, AssetType.PROJECT_BRIEF, AssetType.PROJECT_REPORT,
+        AssetType.ARCHITECTURE_DIAGRAM, AssetType.BRAND_GUIDELINES, AssetType.RESELLER_KIT,
+        AssetType.INFOGRAPHIC, AssetType.ELEARNING, AssetType.ORG_CHART
     ]),
     VIDEO: new Set([
-        AssetType.ONBOARDING_VIDEO, AssetType.TRAINING_SLIDES,
-        AssetType.LEADERSHIP_VLOG, AssetType.MEETING_REC, AssetType.ELEARNING,
-        AssetType.SOCIAL_ASSET, AssetType.AD_CAMPAIGN, AssetType.TV_SPOT,
-        AssetType.PRODUCT_DEMO, AssetType.WEBINAR, AssetType.TESTIMONIAL,
-        AssetType.INTERNAL_PODCAST, // Video podcast
-        // New
-        AssetType.EXPLAINER_VIDEO, AssetType.TRAINING_VIDEO, AssetType.CORP_COMMS_VIDEO,
-        AssetType.EVENT_RECAP, AssetType.INTERVIEW_REC,
-        // Generic
-        AssetType.VIDEO
+        AssetType.VIDEO, AssetType.ONBOARDING_VIDEO, AssetType.TRAINING_VIDEO,
+        AssetType.CORP_COMMS_VIDEO, AssetType.EXPLAINER_VIDEO, AssetType.PRODUCT_DEMO,
+        AssetType.LEADERSHIP_VLOG, AssetType.MEETING_REC, AssetType.INTERVIEW_REC,
+        AssetType.EVENT_RECAP, AssetType.TV_SPOT, AssetType.AD_CAMPAIGN, AssetType.SOCIAL_ASSET
     ]),
     IMAGE: new Set([
-        AssetType.ORG_CHART, AssetType.SOCIAL_ASSET, AssetType.AD_CAMPAIGN,
-        AssetType.WEB_CONTENT, AssetType.POSTER, AssetType.INFOGRAPHIC,
-        // New
-        AssetType.LOGO, AssetType.DIAGRAM, AssetType.EVENT_RECAP, AssetType.ONE_PAGER,
-        // Generic
-        AssetType.IMAGE
+        AssetType.IMAGE, AssetType.NETWORK_DIAGRAM, AssetType.ARCHITECTURE_DIAGRAM,
+        AssetType.CAD_DRAWING, AssetType.DIAGRAM, AssetType.LOGO, AssetType.SOCIAL_ASSET,
+        AssetType.AD_CAMPAIGN, AssetType.WEB_CONTENT, AssetType.POSTER, AssetType.INFOGRAPHIC,
+        AssetType.ORG_CHART, AssetType.ONE_PAGER
     ]),
     AUDIO: new Set([
-        AssetType.MEETING_REC, AssetType.INTERNAL_PODCAST, AssetType.LEADERSHIP_VLOG, // Vlog audio only?
-        // New
-        AssetType.VOICE_MEMO, AssetType.INTERVIEW_REC,
-        // Generic
-        AssetType.AUDIO
+        AssetType.AUDIO, AssetType.VOICE_MEMO, AssetType.MEETING_REC, AssetType.INTERVIEW_REC,
+        AssetType.INTERNAL_PODCAST
     ])
 };
 
 // Filter logic for Text Input mode
 export const TEXT_ONLY_TYPES = new Set([
-    AssetType.SOP, AssetType.POLICY, AssetType.MEMO, AssetType.TECH_SPEC, AssetType.HR_GUIDE, AssetType.WHITE_PAPER,
-    AssetType.AD_CAMPAIGN, AssetType.SOCIAL_ASSET, AssetType.WEB_CONTENT, AssetType.PRESS_RELEASE, AssetType.NEWSLETTER,
-    AssetType.BLOG_POST, AssetType.CASE_STUDY, AssetType.PROPOSAL, AssetType.CRISIS_STATEMENT,
-    // New
-    AssetType.JOB_DESC, AssetType.NDA, AssetType.MSA, AssetType.PRIVACY_POLICY, AssetType.TERMS,
-    AssetType.SALES_SCRIPT, AssetType.EMAIL_TEMPLATE, AssetType.RELEASE_NOTES,
-    AssetType.DOCUMENT, AssetType.PRESENTATION, AssetType.USER_GUIDE
+    // All doc-heavy types that can be analyzed via text
+    AssetType.SYSTEM_DOC, AssetType.CHANGE_REQUEST, AssetType.INCIDENT_REPORT,
+    AssetType.RUNBOOK, AssetType.IT_POLICY, AssetType.WORK_INSTRUCTION,
+    AssetType.SAFETY_BULLETIN, AssetType.SOP, AssetType.POLICY, AssetType.MEMO,
+    AssetType.TECH_SPEC, AssetType.RELEASE_NOTES, AssetType.BOM, AssetType.RCA,
+    AssetType.FMEA, AssetType.PRODUCT_SPEC, AssetType.RESEARCH_PAPER,
+    AssetType.ISO_PROCEDURE, AssetType.AUDIT_REPORT, AssetType.CAPA,
+    AssetType.REGULATORY_FILING, AssetType.SDS_MSDS, AssetType.VENDOR_CONTRACT,
+    AssetType.NDA, AssetType.MSA, AssetType.JOB_DESC, AssetType.OFFER_LETTER,
+    AssetType.AD_CAMPAIGN, AssetType.SOCIAL_ASSET, AssetType.WEB_CONTENT,
+    AssetType.PRESS_RELEASE, AssetType.NEWSLETTER, AssetType.BLOG_POST,
+    AssetType.CASE_STUDY, AssetType.PROPOSAL, AssetType.DOCUMENT,
+    AssetType.USER_GUIDE, AssetType.PRIVACY_POLICY, AssetType.TERMS,
+    AssetType.INFOGRAPHIC, AssetType.BRAND_GUIDELINES
 ]);
 
 export function getAvailableAssets(scope: AudienceScope | null, inputMethod: InputMethod, fileName?: string): Record<string, AssetOption[]> {

@@ -107,6 +107,18 @@ export const VisualAnnotationLayer: React.FC<VisualAnnotationLayerProps> = ({
         console.log("=====================================");
     }, [issues, assetType, mimeType, visualSlides, isPDF, hasVisualSlides, useCarousel, isDoc]);
 
+    // --- VIDEO TIMESTAMP SEEK ON ISSUE SELECTION ---
+    useEffect(() => {
+        if (isVideo && selectedIssueId && videoRef.current) {
+            const issue = issues.find(i => i.id === selectedIssueId);
+            if (issue?.timestamp !== undefined) {
+                videoRef.current.currentTime = issue.timestamp;
+                videoRef.current.pause(); // Pause at the timestamp so user can see the issue
+                console.log(`Seeking to timestamp: ${issue.timestamp}s for issue: ${issue.id}`);
+            }
+        }
+    }, [selectedIssueId, issues, isVideo]);
+
     // --- ZOOM & PAN HANDLERS ---
     const handleWheel = (e: React.WheelEvent) => {
         // Only zoom if NOT a document
@@ -436,11 +448,12 @@ export const VisualAnnotationLayer: React.FC<VisualAnnotationLayerProps> = ({
                     {/* MEDIA CONTENT */}
                     {isVideo ? (
                         <div className="relative group/video inline-block max-w-full">
-                            {/* Video Player */}
+                            {/* Video Player - No native controls */}
                             <video
                                 ref={videoRef}
                                 src={src}
-                                className="max-w-full max-h-[80vh] shadow-2xl rounded-lg cursor-pointer object-contain bg-black"
+                                className="max-w-full max-h-[80vh] shadow-2xl rounded-lg cursor-pointer object-contain bg-black [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-enclosure]:hidden"
+                                style={{ WebkitAppearance: 'none' } as React.CSSProperties}
                                 onClick={() => {
                                     if (videoRef.current?.paused) videoRef.current.play();
                                     else videoRef.current?.pause();
@@ -454,15 +467,95 @@ export const VisualAnnotationLayer: React.FC<VisualAnnotationLayerProps> = ({
                                 playsInline
                             />
 
+                            {/* VIDEO CONTROLS BAR - Bottom with seekbar and issue markers */}
+                            <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-8">
+                                {/* Seekbar with issue markers */}
+                                <div className="relative mb-3">
+                                    {/* Background track */}
+                                    <div
+                                        className="h-1.5 bg-white/30 rounded-full cursor-pointer relative"
+                                        onClick={(e) => {
+                                            if (!videoRef.current || !duration) return;
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            const percent = (e.clientX - rect.left) / rect.width;
+                                            videoRef.current.currentTime = percent * duration;
+                                        }}
+                                    >
+                                        {/* Progress fill */}
+                                        <div
+                                            className="absolute top-0 left-0 h-full bg-brand-primary rounded-full transition-all"
+                                            style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                                        />
+
+                                        {/* Issue Markers on seekbar */}
+                                        {issues.filter(i => i.timestamp !== undefined).map((issue, idx) => {
+                                            const position = duration ? (issue.timestamp! / duration) * 100 : 0;
+                                            return (
+                                                <div
+                                                    key={`marker-${issue.id}`}
+                                                    className={cn(
+                                                        "absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white cursor-pointer hover:scale-150 transition-transform",
+                                                        issue.severity === 'High' ? "bg-red-500" : issue.severity === 'Medium' ? "bg-amber-500" : "bg-blue-500"
+                                                    )}
+                                                    style={{ left: `${position}%`, marginLeft: '-6px' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (videoRef.current && issue.timestamp !== undefined) {
+                                                            videoRef.current.currentTime = issue.timestamp;
+                                                            videoRef.current.pause();
+                                                        }
+                                                        onIssueSelect(issue.id);
+                                                    }}
+                                                    title={`Issue ${idx + 1}: ${issue.description.substring(0, 50)}...`}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Controls row */}
+                                <div className="flex items-center gap-4">
+                                    {/* Play/Pause button */}
+                                    <button
+                                        onClick={() => {
+                                            if (videoRef.current?.paused) videoRef.current.play();
+                                            else videoRef.current?.pause();
+                                        }}
+                                        className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                                    >
+                                        {isPlaying ? (
+                                            <div className="w-4 h-4 flex gap-1">
+                                                <div className="w-1.5 h-4 bg-white rounded" />
+                                                <div className="w-1.5 h-4 bg-white rounded" />
+                                            </div>
+                                        ) : (
+                                            <Play className="w-4 h-4 text-white fill-white" />
+                                        )}
+                                    </button>
+
+                                    {/* Time display */}
+                                    <span className="text-xs font-mono text-white/80">
+                                        {Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(Math.floor(duration % 60)).padStart(2, '0')}
+                                    </span>
+
+                                    {/* Issue count indicator */}
+                                    {issues.filter(i => i.timestamp !== undefined).length > 0 && (
+                                        <span className="text-xs text-white/60 ml-auto">
+                                            {issues.filter(i => i.timestamp !== undefined).length} issues marked
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* VIDEO-ONLY ANNOTATION OVERLAY (Attached to video bounds) */}
                             <div className="absolute inset-0 pointer-events-none rounded-lg">
                                 <AnimatePresence>
-                                    {issues.filter(i => (i.boundingBox || (isVideo && i.timestamp !== undefined))).map((issue) => {
+                                    {issues.filter(i => i.timestamp !== undefined).map((issue) => {
                                         const isSelected = selectedIssueId === issue.id;
-                                        // Show if selected OR within 3 seconds of current time
-                                        const isMatch = isSelected || (issue.timestamp !== undefined && Math.abs(currentTime - issue.timestamp) < 3.0);
+                                        // Only show if selected OR within 2 seconds of current time (tighter window)
+                                        const isWithinTimeWindow = issue.timestamp !== undefined && Math.abs(currentTime - issue.timestamp) < 2.0;
 
-                                        if (!isMatch) return null;
+                                        if (!isSelected && !isWithinTimeWindow) return null;
 
                                         // Fallback to center if no bounding box (common for video scene analysis)
                                         const box = issue.boundingBox || { x: 50, y: 50, width: 0, height: 0, top: 50, left: 50 };
@@ -471,47 +564,83 @@ export const VisualAnnotationLayer: React.FC<VisualAnnotationLayerProps> = ({
                                         const centerX = box.x + (box.width / 2);
                                         const centerY = box.y + (box.height / 2);
                                         const isRightSide = centerX > 50;
+
+                                        // Calculate proximity for opacity (fade in/out smoothly)
+                                        const timeDiff = Math.abs(currentTime - (issue.timestamp || 0));
+                                        const opacity = isSelected ? 1 : Math.max(0, 1 - (timeDiff / 2));
+
                                         return (
                                             <motion.div
                                                 key={issue.id}
-                                                initial={{ opacity: 0, scale: 0 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0 }}
+                                                initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                                                animate={{
+                                                    opacity: opacity,
+                                                    scale: isSelected ? 1.1 : 1,
+                                                    y: 0
+                                                }}
+                                                exit={{ opacity: 0, scale: 0.5, y: -10 }}
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 300,
+                                                    damping: 25,
+                                                    opacity: { duration: 0.3 }
+                                                }}
                                                 style={{ left: `${centerX}%`, top: `${centerY}%` }}
                                                 className="absolute z-50 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
                                                 onClick={(e) => { e.stopPropagation(); onIssueSelect(issue.id); }}
                                                 onMouseEnter={() => setHoveredMarkerId(issue.id)}
                                                 onMouseLeave={() => setHoveredMarkerId(null)}
                                             >
-                                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition-all duration-300 relative group/dot", isSelected ? "scale-125 ring-2 ring-white z-50 text-white" : "scale-100 hover:scale-110 opacity-90 text-white", issue.severity === 'High' ? "bg-red-600" : issue.severity === 'Medium' ? "bg-amber-500" : "bg-indigo-600")}>
-                                                    <span className="text-xs font-black">{globalIndex + 1}</span>
-                                                    {(isSelected || issue.severity === 'High') && <div className={cn("absolute inset-0 rounded-full animate-ping opacity-40 will-change-transform", issue.severity === 'High' ? "bg-red-500" : issue.severity === 'Medium' ? "bg-amber-500" : "bg-indigo-500")} />}
-                                                </div>
-                                                {(isSelected || hoveredMarkerId === issue.id) && (
-                                                    <div className={cn("absolute top-1/2 -translate-y-1/2 w-64 z-50 pointer-events-none pl-4", isRightSide ? "right-full pr-4 pl-0" : "left-full")}>
-                                                        <motion.div initial={{ opacity: 0, x: isRightSide ? 10 : -10, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }} className="bg-white border border-slate-200 rounded-xl shadow-xl p-4 text-left relative overflow-hidden">
-                                                            <div className={cn("absolute top-0 bottom-0 left-0 w-1", issue.severity === 'High' ? "bg-red-500" : issue.severity === 'Medium' ? "bg-amber-500" : "bg-indigo-500")} />
-                                                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
-                                                                <span className="text-[10px] font-black uppercase text-slate-400">#{globalIndex + 1}</span>
-                                                                <span className="text-xs font-bold text-slate-900 uppercase truncate">{issue.category}</span>
-                                                            </div>
-                                                            <p className="text-xs text-slate-600 font-medium leading-relaxed mb-3">{issue.description}</p>
-                                                            {issue.fix && (
-                                                                <div className="bg-slate-50 border border-slate-200 rounded p-2 flex gap-2 items-start">
-                                                                    <Zap className="w-3 h-3 text-emerald-600 mt-0.5 shrink-0" />
-                                                                    <div className="text-[10px] text-slate-600 leading-tight font-mono">{issue.fix}</div>
-                                                                </div>
-                                                            )}
-                                                            <div className="flex items-center gap-2 mt-2">
-                                                                {issue.timestamp !== undefined && (
-                                                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium border border-slate-200">
-                                                                        {Math.floor(issue.timestamp / 60)}:{(issue.timestamp % 60).toString().padStart(2, '0')}
+                                                <motion.div
+                                                    animate={{ scale: [1, 1.05, 1] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                                    className={cn(
+                                                        "w-10 h-10 rounded-full flex items-center justify-center shadow-lg cursor-pointer relative backdrop-blur-sm",
+                                                        isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-black/20" : "hover:scale-110",
+                                                        issue.severity === 'High' ? "bg-red-500/90 text-white" :
+                                                            issue.severity === 'Medium' ? "bg-amber-500/90 text-white" :
+                                                                "bg-blue-500/90 text-white"
+                                                    )}
+                                                >
+                                                    <span className="text-sm font-bold">{globalIndex + 1}</span>
+                                                    {/* Pulse ring effect */}
+                                                    <div className={cn(
+                                                        "absolute inset-0 rounded-full animate-ping opacity-30",
+                                                        issue.severity === 'High' ? "bg-red-500" :
+                                                            issue.severity === 'Medium' ? "bg-amber-500" : "bg-blue-500"
+                                                    )} />
+                                                </motion.div>
+
+                                                {/* Tooltip - appears on hover or selection */}
+                                                <AnimatePresence>
+                                                    {(isSelected || hoveredMarkerId === issue.id) && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, x: isRightSide ? 20 : -20, scale: 0.9 }}
+                                                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                                                            exit={{ opacity: 0, x: isRightSide ? 20 : -20, scale: 0.9 }}
+                                                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                                            className={cn("absolute top-1/2 -translate-y-1/2 w-64 z-50 pointer-events-none", isRightSide ? "right-full mr-4" : "left-full ml-4")}
+                                                        >
+                                                            <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-2xl p-4 text-left relative overflow-hidden">
+                                                                <div className={cn("absolute top-0 bottom-0 left-0 w-1", issue.severity === 'High' ? "bg-red-500" : issue.severity === 'Medium' ? "bg-amber-500" : "bg-blue-500")} />
+                                                                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
+                                                                    <span className="text-[10px] font-black uppercase text-slate-400">#{globalIndex + 1}</span>
+                                                                    <span className="text-xs font-bold text-slate-900 uppercase truncate">{issue.category}</span>
+                                                                    <span className="text-[10px] font-mono bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-auto">
+                                                                        {Math.floor((issue.timestamp || 0) / 60)}:{String(Math.floor((issue.timestamp || 0) % 60)).padStart(2, '0')}
                                                                     </span>
+                                                                </div>
+                                                                <p className="text-xs text-slate-600 font-medium leading-relaxed">{issue.description}</p>
+                                                                {issue.fix && (
+                                                                    <div className="mt-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex gap-2 items-start">
+                                                                        <Zap className="w-3 h-3 text-emerald-600 mt-0.5 shrink-0" />
+                                                                        <div className="text-[10px] text-emerald-700 leading-tight">{issue.fix}</div>
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                         </motion.div>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                </AnimatePresence>
                                             </motion.div>
                                         );
                                     })}
@@ -553,11 +682,6 @@ export const VisualAnnotationLayer: React.FC<VisualAnnotationLayerProps> = ({
                                     ))}
                                 </div>
 
-                            </div>
-
-                            {/* CENTER PLAY BUTTON OVERLAY */}
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
-                                {!isPlaying && <div className="bg-white/90 rounded-full p-4 shadow-2xl scale-150 border border-slate-200"><Play className="w-8 h-8 text-[#E2000F] fill-[#E2000F]" /></div>}
                             </div>
                         </div>
                     ) : (

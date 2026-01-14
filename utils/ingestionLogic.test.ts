@@ -5,15 +5,15 @@ import { AssetType, AudienceScope } from '../types';
 describe('Ingestion Logic', () => {
     test('returns correct assets for Internal scope', () => {
         const assets = getAvailableAssets(AudienceScope.INTERNAL, InputMethod.FILE);
-        expect(assets['HR & People (Culture)']).toBeDefined();
-        // Marketing is external, should not be in internal scope unless shared
-        expect(assets['Marketing & Brand (Awareness)']).toBeUndefined();
+        expect(assets['HR & People']).toBeDefined();
+        // Marketing is external, should not be in internal scope
+        expect(assets['Marketing & Brand']).toBeUndefined();
     });
 
     test('returns correct assets for External scope', () => {
         const assets = getAvailableAssets(AudienceScope.EXTERNAL, InputMethod.FILE);
-        expect(assets['Marketing & Brand (Awareness)']).toBeDefined();
-        expect(assets['HR & People (Culture)']).toBeUndefined();
+        expect(assets['Marketing & Brand']).toBeDefined();
+        expect(assets['HR & People']).toBeUndefined();
     });
 
     test('filters text-only assets correctly', () => {

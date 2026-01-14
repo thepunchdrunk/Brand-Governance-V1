@@ -38,6 +38,37 @@ export enum AudienceScope {
 
 export type Region = string;
 
+export enum AssetDomain {
+  IT = 'IT & Infrastructure',
+  MANUFACTURING = 'Manufacturing & Shop Floor',
+  ENGINEERING = 'Engineering & R&D',
+  QUALITY = 'Quality & Compliance',
+  SUPPLY_CHAIN = 'Supply Chain & Logistics',
+  HR = 'HR & People',
+  COMMERCIAL = 'Sales & Commercial',
+  MARKETING = 'Marketing & Brand',
+  CORPORATE = 'Corporate & Strategy',
+  GENERAL = 'General'
+}
+
+export enum AssetCategory {
+  OPERATIONAL = 'Operational',
+  REGULATORY = 'Regulatory/Compliance',
+  COMMERCIAL = 'Commercial',
+  GOVERNANCE = 'Governance',
+  TECHNICAL = 'Technical',
+  INTERNAL_COMMS = 'Internal Communications'
+}
+
+export interface TaxonomyEntry {
+  type: AssetType;
+  label: string;
+  domain: AssetDomain;
+  category: AssetCategory;
+  sensitivity: 'Public' | 'Internal' | 'Confidential' | 'Highly Confidential';
+  defaultContext: CommunicationContext;
+}
+
 export enum AssetType {
   // Internal Docs
   SOP = 'SOP',
@@ -152,12 +183,64 @@ export enum AssetType {
   VOICE_MEMO = 'Voice Note/Memo', // New
   INTERVIEW_REC = 'Interview Recording', // New
 
+  // === IT OPERATIONS & INFRASTRUCTURE ===
+  SYSTEM_DOC = 'System Documentation',
+  CHANGE_REQUEST = 'Change Request',
+  INCIDENT_REPORT = 'Incident Report',
+  NETWORK_DIAGRAM = 'Network Diagram',
+  ARCHITECTURE_DIAGRAM = 'Architecture Diagram',
+  RUNBOOK = 'Runbook/Playbook',
+  DR_PLAN = 'Disaster Recovery Plan',
+  IT_POLICY = 'IT Policy',  // AUP, Password Policy, etc.
+
+  // === MANUFACTURING / SHOP FLOOR ===
+  WORK_INSTRUCTION = 'Work Instruction',
+  QUALITY_CHECKLIST = 'Quality Checklist',
+  EQUIPMENT_MANUAL = 'Equipment Manual',
+  MAINTENANCE_LOG = 'Maintenance Log',
+  SAFETY_BULLETIN = 'Safety Bulletin',
+  SHIFT_HANDOVER = 'Shift Handover Report',
+  PRODUCTION_REPORT = 'Production Report',
+
+  // === ENGINEERING & PRODUCT DEVELOPMENT ===
+  CAD_DRAWING = 'CAD Drawing/Blueprint',
+  BOM = 'Bill of Materials',
+  TEST_REPORT = 'Test Report',
+  ECN = 'Engineering Change Notice',
+  RCA = 'Root Cause Analysis',
+  FMEA = 'FMEA Document',
+  TECH_DATASHEET = 'Technical Datasheet',
+  PRODUCT_SPEC = 'Product Specification',
+
+  // === QUALITY & COMPLIANCE ===
+  ISO_PROCEDURE = 'ISO Procedure',
+  AUDIT_REPORT = 'Audit Report',
+  CAPA = 'CAPA Document',
+  REGULATORY_FILING = 'Regulatory Filing',
+  CERTIFICATION = 'Certification Document',
+  SDS_MSDS = 'Safety Data Sheet',
+
+  // === SUPPLY CHAIN & LOGISTICS ===
+  VENDOR_CONTRACT = 'Vendor Contract',
+  PURCHASE_ORDER = 'Purchase Order',
+  SHIPPING_DOC = 'Shipping Document',
+  INVENTORY_REPORT = 'Inventory Report',
+  SUPPLIER_SCORECARD = 'Supplier Scorecard',
+
   // Fallbacks/Legacy
   DOCUMENT = 'Document',
   PRESENTATION = 'Presentation',
   IMAGE = 'Image',
   VIDEO = 'Video',
-  AUDIO = 'Audio Clip'
+  AUDIO = 'Audio Clip',
+
+  // === NEW DYNAMIC TYPES ===
+  SYSTEM_EXPLAINER = 'System Explainer Video',
+  PROCESS_EXPLAINER = 'Process Explainer Video',
+  BOM_DOCUMENT = 'Bill of Materials',
+  CAD_BLUEPRINT = 'CAD Drawing/Blueprint',
+  SECURITY_POLICY = 'Security Policy',
+  KNOWLEDGE_BASE = 'Knowledge Base Article'
 }
 
 export interface BrandSettings {
