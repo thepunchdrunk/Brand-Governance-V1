@@ -88,6 +88,11 @@ export const EXTERNAL_ASSETS: Record<string, AssetOption[]> = {
     "Marketing & Brand": [
         { label: 'Social Media Post', value: AssetType.SOCIAL_ASSET, context: CommunicationContext.MARKETING },
         { label: 'Brand Guidelines', value: AssetType.BRAND_GUIDELINES, context: CommunicationContext.MARKETING },
+        { label: 'Blog Post', value: AssetType.BLOG_POST, context: CommunicationContext.MARKETING },
+    ],
+    "General Assets": [
+        { label: 'Video Asset', value: AssetType.VIDEO, context: CommunicationContext.NOT_SURE },
+        { label: 'Image Asset', value: AssetType.IMAGE, context: CommunicationContext.NOT_SURE },
     ]
 };
 

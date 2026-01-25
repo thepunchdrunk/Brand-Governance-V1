@@ -169,7 +169,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ history }) => {
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal vertical={false} />
                                 <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
                                 <YAxis dataKey="name" type="category" width={110} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a' }} formatter={(value: number | undefined) => [`${value || 0}%`, 'Pass Rate']} />
+                                <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a' }} formatter={(value: any) => [`${value || 0}%`, 'Pass Rate']} />
                                 <Bar dataKey="rate" radius={[0, 4, 4, 0]} barSize={18}>
                                     {assetTypePerformance.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.rate >= 80 ? '#10b981' : entry.rate >= 50 ? '#f59e0b' : '#ef4444'} />)}
                                 </Bar>
